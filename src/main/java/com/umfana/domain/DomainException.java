@@ -10,7 +10,9 @@ public final class DomainException extends RuntimeException {
         TagNameAlreadyExists,
         CouldNotCreateTag,
         CouldNotChangeTag,
-        CouldNotDeleteTag
+        CouldNotDeleteTag,
+        TagIsDeleted,
+        WrongTagId
     }
 
     private final Key description;

@@ -12,7 +12,6 @@ import com.umfana.domain.models.tag.valueobjects.TagColor;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.UUID;
 
 public class Tag {
 
@@ -46,7 +45,7 @@ public class Tag {
             throw new DomainException(DomainException.Key.TagNameDoesNotBeBlank);
         }
         TagEvent createdEvent = new TagCreatedEvent(
-                new TagId(UUID.randomUUID()),
+                command.command().id(),
                 command.executedAt(),
                 command.command().name(),
                 command.command().color()
@@ -55,8 +54,11 @@ public class Tag {
     }
 
     public void change(ExecutedCommand<ChangeTagCommand> command) {
-        if (state.equals(TagState.INIT) || state.equals(TagState.DELETED)) {
-            throw new DomainException(DomainException.Key.CouldNotChangeTag);
+        if (command.command().id() == null || !command.command().id().getValue().equals(this.id.getValue())) {
+            throw new DomainException(DomainException.Key.WrongTagId);
+        }
+        if (state.equals(TagState.DELETED)) {
+            throw new DomainException(DomainException.Key.TagIsDeleted);
         }
         if (command.command().name() == null || command.command().name().isEmpty()) {
             throw new DomainException(DomainException.Key.TagNameDoesNotBeBlank);
@@ -75,8 +77,11 @@ public class Tag {
     }
 
     public void delete(ExecutedCommand<DeleteTagCommand> command) {
-        if (state.equals(TagState.INIT) || state.equals(TagState.DELETED)) {
-            throw new DomainException(DomainException.Key.CouldNotCreateTag);
+        if (command.command().id() == null || !command.command().id().getValue().equals(this.id.getValue())) {
+            throw new DomainException(DomainException.Key.WrongTagId);
+        }
+        if (state.equals(TagState.DELETED)) {
+            throw new DomainException(DomainException.Key.CouldNotDeleteTag);
         }
         TagEvent deletedEvent = new TagDeletedEvent(command.command().id(), command.executedAt());
         recordEvents(List.of(deletedEvent));
@@ -90,7 +95,7 @@ public class Tag {
     private void apply(Event event) {
         switch (event) {
             case TagCreatedEvent e -> {
-                this.id = new TagId(UUID.randomUUID());
+                this.id = e.getTagId();
                 this.state = TagState.CREATED;
                 this.color = e.getColor();
                 this.name = e.getName();
@@ -109,22 +114,33 @@ public class Tag {
     }
 
     public void markEventsCommitted() {
+        ensureNotDeleted();
         uncommittedEvents.clear();
     }
 
     public TagId getId() {
+        ensureNotDeleted();
         return id;
     }
 
     public String getName() {
+        ensureNotDeleted();
         return name;
     }
 
     public TagColor getColor() {
+        ensureNotDeleted();
         return color;
     }
 
     public boolean isDeleted() {
         return state.equals(TagState.DELETED);
     }
+
+    private void ensureNotDeleted() {
+        if (isDeleted()) {
+            throw new DomainException(DomainException.Key.TagIsDeleted);
+        }
+    }
+
 }
