@@ -17,7 +17,7 @@ public class DeleteTagApplicationService extends ApplicationService<DeleteTagCom
     @Override
     public void execute(ExecutedCommand<DeleteTagCommand> command) {
         List<Event> events = eventStore.loadEvents(command.command().id());
-        Tag tag = Tag.rehydrate(events);
+        Tag tag = new Tag(events);
         tag.delete(command);
         eventStore.saveEvents(tag.getId(), tag.getUncommittedEvents());
     }

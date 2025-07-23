@@ -3,39 +3,33 @@ package com.umfana.domain.models.tag;
 import com.umfana.domain.DomainException;
 import com.umfana.domain.Event;
 import com.umfana.domain.ExecutedCommand;
+import com.umfana.domain.models.Aggregate;
 import com.umfana.domain.models.tag.commands.ChangeTagCommand;
 import com.umfana.domain.models.tag.commands.CreateTagCommand;
 import com.umfana.domain.models.tag.commands.DeleteTagCommand;
-import com.umfana.domain.models.tag.events.*;
+import com.umfana.domain.models.tag.events.TagColorChangedEvent;
+import com.umfana.domain.models.tag.events.TagCreatedEvent;
+import com.umfana.domain.models.tag.events.TagDeletedEvent;
+import com.umfana.domain.models.tag.events.TagNameChangedEvent;
 import com.umfana.domain.models.tag.valueobjects.TagColor;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
-public class Tag {
+public class Tag extends Aggregate {
 
     private enum TagState {
         INIT, CREATED, DELETED
     }
 
     private TagId id;
-    private TagState state;
+    private TagState state = TagState.INIT;
     private String name;
     private TagColor color;
 
-    private final List<Event> uncommittedEvents = new ArrayList<>();
-
-    private Tag(TagState state) {
-        // private to enforce creation via Event replay
-        this.state = state;
+    public Tag(List<Event> events) {
+        super(events);
     }
 
-    public static Tag rehydrate(List<Event> events) {
-        Tag tag = new Tag(TagState.INIT);
-        events.forEach(tag::apply);
-        return tag;
-    }
 
     public void create(ExecutedCommand<CreateTagCommand> command) {
         if (state.equals(TagState.CREATED) || state.equals(TagState.DELETED)) {
@@ -44,7 +38,11 @@ public class Tag {
         if (command.command().name() == null || command.command().name().isEmpty()) {
             throw new DomainException(DomainException.Key.TagNameDoesNotBeBlank);
         }
-        TagEvent createdEvent = new TagCreatedEvent(
+        if (command.command().color() == null) {
+            throw new DomainException(DomainException.Key.TagColorDoesNotBeNull);
+        }
+
+        Event createdEvent = new TagCreatedEvent(
                 command.command().id(),
                 command.executedAt(),
                 command.command().name(),
@@ -63,12 +61,12 @@ public class Tag {
         if (command.command().name() == null || command.command().name().isEmpty()) {
             throw new DomainException(DomainException.Key.TagNameDoesNotBeBlank);
         }
-        TagEvent colorChangedEvent = new TagColorChangedEvent(
+        var colorChangedEvent = new TagColorChangedEvent(
                 this.id,
                 command.executedAt(),
                 command.command().color()
         );
-        TagEvent nameChangedEvent = new TagNameChangedEvent(
+        var nameChangedEvent = new TagNameChangedEvent(
                 this.id,
                 command.executedAt(),
                 command.command().name()
@@ -83,16 +81,12 @@ public class Tag {
         if (state.equals(TagState.DELETED)) {
             throw new DomainException(DomainException.Key.CouldNotDeleteTag);
         }
-        TagEvent deletedEvent = new TagDeletedEvent(command.command().id(), command.executedAt());
+        Event deletedEvent = new TagDeletedEvent(command.command().id(), command.executedAt());
         recordEvents(List.of(deletedEvent));
     }
 
-    private void recordEvents(List<Event> events) {
-        this.uncommittedEvents.addAll(events);
-        events.forEach(this::apply);
-    }
-
-    private void apply(Event event) {
+    @Override
+    protected void apply(Event event) {
         switch (event) {
             case TagCreatedEvent e -> {
                 this.id = e.getTagId();
@@ -107,15 +101,6 @@ public class Tag {
             }
             default -> throw new UnsupportedOperationException("Unknown event type: " + event.getClass());
         }
-    }
-
-    public List<Event> getUncommittedEvents() {
-        return Collections.unmodifiableList(uncommittedEvents);
-    }
-
-    public void markEventsCommitted() {
-        ensureNotDeleted();
-        uncommittedEvents.clear();
     }
 
     public TagId getId() {

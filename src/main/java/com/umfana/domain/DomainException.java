@@ -12,6 +12,7 @@ public final class DomainException extends RuntimeException {
         CouldNotChangeTag,
         CouldNotDeleteTag,
         TagIsDeleted,
+        TagColorDoesNotBeNull,
         WrongTagId
     }
 

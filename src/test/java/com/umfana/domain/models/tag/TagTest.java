@@ -121,7 +121,7 @@ class TagTest {
 
     private Tag createTag(String name) {
         ExecutedCommand<CreateTagCommand> createTagCommand = new ExecutedCommand<>(new CreateTagCommand(TAG_ID, name, TagColor.BLUE), NOW);
-        Tag tag = Tag.rehydrate(List.of());
+        Tag tag = new Tag(List.of());
         tag.create(createTagCommand);
         return tag;
     }

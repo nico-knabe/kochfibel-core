@@ -22,7 +22,7 @@ public class ChangeTagApplicationService extends ApplicationService<ChangeTagCom
     public void execute(ExecutedCommand<ChangeTagCommand> command) {
         if (!isTagNameUniqueDomainService.isTagNameUnique(command.command().name())) {
             List<Event> events = eventStore.loadEvents(command.command().id());
-            Tag tag = Tag.rehydrate(events);
+            Tag tag = new Tag(events);
             tag.change(command);
             eventStore.saveEvents(tag.getId(), tag.getUncommittedEvents());
         } else {

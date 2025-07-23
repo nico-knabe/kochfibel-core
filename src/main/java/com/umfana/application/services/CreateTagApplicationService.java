@@ -21,7 +21,7 @@ public class CreateTagApplicationService extends ApplicationService<CreateTagCom
     @Override
     public void execute(ExecutedCommand<CreateTagCommand> command) {
         if (isTagNameUniqueDomainService.isTagNameUnique(command.command().name())) {
-            Tag tag = Tag.rehydrate(List.of());
+            Tag tag = new Tag(List.of());
             tag.create(command);
             eventStore.saveEvents(tag.getId(), tag.getUncommittedEvents());
         } else {
