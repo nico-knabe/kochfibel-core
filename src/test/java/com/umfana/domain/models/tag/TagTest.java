@@ -1,7 +1,6 @@
 package com.umfana.domain.models.tag;
 
 import com.umfana.domain.DomainException;
-import com.umfana.domain.ExecutedCommand;
 import com.umfana.domain.models.tag.commands.ChangeTagCommand;
 import com.umfana.domain.models.tag.commands.CreateTagCommand;
 import com.umfana.domain.models.tag.commands.DeleteTagCommand;
@@ -50,7 +49,7 @@ class TagTest {
     @Test
     void couldNotCreateCreatedTagTest() {
         Tag tag = createTag("name");
-        ExecutedCommand<CreateTagCommand> createTagCommand = new ExecutedCommand<>(new CreateTagCommand(TAG_ID, "name", TagColor.BLUE), NOW);
+        CreateTagCommand createTagCommand = new CreateTagCommand(NOW, TAG_ID, "name", TagColor.BLUE);
         DomainException exception = Assertions.assertThrows(DomainException.class, () -> tag.create(createTagCommand));
         Assertions.assertEquals(DomainException.Key.CouldNotCreateTag, exception.getDescription());
     }
@@ -59,7 +58,7 @@ class TagTest {
     void couldNotCreateDeletedTagTest() {
         Tag tag = createTag("name");
         deleteTag(tag);
-        ExecutedCommand<CreateTagCommand> createTagCommand = new ExecutedCommand<>(new CreateTagCommand(TAG_ID, "name", TagColor.BLUE), NOW);
+        CreateTagCommand createTagCommand = new CreateTagCommand(NOW, TAG_ID, "name", TagColor.BLUE);
         DomainException exception = Assertions.assertThrows(DomainException.class, () -> tag.create(createTagCommand));
         Assertions.assertEquals(DomainException.Key.CouldNotCreateTag, exception.getDescription());
     }
@@ -79,7 +78,7 @@ class TagTest {
     @Test
     void couldNotDeleteTagWithNullIdTest() {
         Tag tag = createTag("name");
-        ExecutedCommand<DeleteTagCommand> deleteTagCommand = new ExecutedCommand<>(new DeleteTagCommand(null), Instant.now());
+        DeleteTagCommand deleteTagCommand = new DeleteTagCommand(NOW.plusSeconds(1), null);
         DomainException exception = Assertions.assertThrows(DomainException.class, () -> tag.delete(deleteTagCommand));
         Assertions.assertEquals(DomainException.Key.WrongTagId, exception.getDescription());
     }
@@ -87,7 +86,7 @@ class TagTest {
     @Test
     void couldNotDeleteTagWithDifferentIdTest() {
         Tag tag = createTag("name");
-        ExecutedCommand<DeleteTagCommand> deleteTagCommand = new ExecutedCommand<>(new DeleteTagCommand(new TagId(UUID.randomUUID())), Instant.now());
+        DeleteTagCommand deleteTagCommand = new DeleteTagCommand(NOW.plusSeconds(1), new TagId(UUID.randomUUID()));
         DomainException exception = Assertions.assertThrows(DomainException.class, () -> tag.delete(deleteTagCommand));
         Assertions.assertEquals(DomainException.Key.WrongTagId, exception.getDescription());
     }
@@ -97,7 +96,7 @@ class TagTest {
         Tag tag = createTag("name");
         TagId tagId = tag.getId();
         deleteTag(tag);
-        ExecutedCommand<ChangeTagCommand> changeTagCommand = new ExecutedCommand<>(new ChangeTagCommand(tagId, "newName", TagColor.RED), NOW);
+        ChangeTagCommand changeTagCommand = new ChangeTagCommand(NOW.plusSeconds(1), tagId, "newName", TagColor.RED);
         DomainException exception = Assertions.assertThrows(DomainException.class, () -> tag.change(changeTagCommand));
         Assertions.assertEquals(DomainException.Key.TagIsDeleted, exception.getDescription());
     }
@@ -120,19 +119,19 @@ class TagTest {
     }
 
     private Tag createTag(String name) {
-        ExecutedCommand<CreateTagCommand> createTagCommand = new ExecutedCommand<>(new CreateTagCommand(TAG_ID, name, TagColor.BLUE), NOW);
+        CreateTagCommand createTagCommand = new CreateTagCommand(NOW, TAG_ID, name, TagColor.BLUE);
         Tag tag = new Tag(List.of());
         tag.create(createTagCommand);
         return tag;
     }
 
     private void changeTag(Tag tag) {
-        ExecutedCommand<ChangeTagCommand> changeTagCommand = new ExecutedCommand<>(new ChangeTagCommand(TAG_ID, "newName", TagColor.RED), Instant.now());
+        ChangeTagCommand changeTagCommand = new ChangeTagCommand(NOW.plusSeconds(1), TAG_ID, "newName", TagColor.RED);
         tag.change(changeTagCommand);
     }
 
     private void deleteTag(Tag tag) {
-        ExecutedCommand<DeleteTagCommand> deleteTagCommand = new ExecutedCommand<>(new DeleteTagCommand(TAG_ID), Instant.now());
+        DeleteTagCommand deleteTagCommand = new DeleteTagCommand(NOW.plusSeconds(1), TAG_ID);
         tag.delete(deleteTagCommand);
     }
 

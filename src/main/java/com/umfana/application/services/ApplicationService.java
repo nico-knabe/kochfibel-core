@@ -2,7 +2,6 @@ package com.umfana.application.services;
 
 import com.umfana.application.eventstore.EventStore;
 import com.umfana.domain.Command;
-import com.umfana.domain.ExecutedCommand;
 
 public abstract class ApplicationService<T extends Command> {
 
@@ -12,5 +11,5 @@ public abstract class ApplicationService<T extends Command> {
         this.eventStore = eventStore;
     }
 
-    public abstract void execute(ExecutedCommand<T> command);
+    public abstract void execute(T command);
 }

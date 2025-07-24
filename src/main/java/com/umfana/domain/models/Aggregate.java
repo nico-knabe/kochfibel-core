@@ -1,5 +1,6 @@
 package com.umfana.domain.models;
 
+import com.umfana.domain.Command;
 import com.umfana.domain.Event;
 
 import java.util.ArrayList;
@@ -36,4 +37,6 @@ public abstract class Aggregate {
     }
 
     protected abstract void apply(Event event);
+
+    protected abstract void handle(Command command);
 }

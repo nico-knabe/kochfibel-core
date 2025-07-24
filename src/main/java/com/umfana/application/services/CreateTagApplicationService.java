@@ -2,7 +2,6 @@ package com.umfana.application.services;
 
 import com.umfana.application.eventstore.EventStore;
 import com.umfana.domain.DomainException;
-import com.umfana.domain.ExecutedCommand;
 import com.umfana.domain.models.tag.Tag;
 import com.umfana.domain.models.tag.commands.CreateTagCommand;
 import com.umfana.domain.services.IsTagNameUniqueDomainService;
@@ -19,8 +18,8 @@ public class CreateTagApplicationService extends ApplicationService<CreateTagCom
     }
 
     @Override
-    public void execute(ExecutedCommand<CreateTagCommand> command) {
-        if (isTagNameUniqueDomainService.isTagNameUnique(command.command().name())) {
+    public void execute(CreateTagCommand command) {
+        if (isTagNameUniqueDomainService.isTagNameUnique(command.name())) {
             Tag tag = new Tag(List.of());
             tag.create(command);
             eventStore.saveEvents(tag.getId(), tag.getUncommittedEvents());

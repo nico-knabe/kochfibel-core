@@ -1,8 +1,8 @@
 package com.umfana.domain.models.tag;
 
+import com.umfana.domain.Command;
 import com.umfana.domain.DomainException;
 import com.umfana.domain.Event;
-import com.umfana.domain.ExecutedCommand;
 import com.umfana.domain.models.Aggregate;
 import com.umfana.domain.models.tag.commands.ChangeTagCommand;
 import com.umfana.domain.models.tag.commands.CreateTagCommand;
@@ -31,57 +31,57 @@ public class Tag extends Aggregate {
     }
 
 
-    public void create(ExecutedCommand<CreateTagCommand> command) {
+    public void create(CreateTagCommand command) {
         if (state.equals(TagState.CREATED) || state.equals(TagState.DELETED)) {
             throw new DomainException(DomainException.Key.CouldNotCreateTag);
         }
-        if (command.command().name() == null || command.command().name().isEmpty()) {
+        if (command.name() == null || command.name().isEmpty()) {
             throw new DomainException(DomainException.Key.TagNameDoesNotBeBlank);
         }
-        if (command.command().color() == null) {
+        if (command.color() == null) {
             throw new DomainException(DomainException.Key.TagColorDoesNotBeNull);
         }
 
         Event createdEvent = new TagCreatedEvent(
-                command.command().id(),
-                command.executedAt(),
-                command.command().name(),
-                command.command().color()
+                command.id(),
+                command.getExecutedAt(),
+                command.name(),
+                command.color()
         );
         recordEvents(List.of(createdEvent));
     }
 
-    public void change(ExecutedCommand<ChangeTagCommand> command) {
-        if (command.command().id() == null || !command.command().id().getValue().equals(this.id.getValue())) {
+    public void change(ChangeTagCommand command) {
+        if (command.id() == null || !command.id().getValue().equals(this.id.getValue())) {
             throw new DomainException(DomainException.Key.WrongTagId);
         }
         if (state.equals(TagState.DELETED)) {
             throw new DomainException(DomainException.Key.TagIsDeleted);
         }
-        if (command.command().name() == null || command.command().name().isEmpty()) {
+        if (command.name() == null || command.name().isEmpty()) {
             throw new DomainException(DomainException.Key.TagNameDoesNotBeBlank);
         }
         var colorChangedEvent = new TagColorChangedEvent(
                 this.id,
-                command.executedAt(),
-                command.command().color()
+                command.getExecutedAt(),
+                command.color()
         );
         var nameChangedEvent = new TagNameChangedEvent(
                 this.id,
-                command.executedAt(),
-                command.command().name()
+                command.getExecutedAt(),
+                command.name()
         );
         recordEvents(List.of(colorChangedEvent, nameChangedEvent));
     }
 
-    public void delete(ExecutedCommand<DeleteTagCommand> command) {
-        if (command.command().id() == null || !command.command().id().getValue().equals(this.id.getValue())) {
+    public void delete(DeleteTagCommand command) {
+        if (command.id() == null || !command.id().getValue().equals(this.id.getValue())) {
             throw new DomainException(DomainException.Key.WrongTagId);
         }
         if (state.equals(TagState.DELETED)) {
             throw new DomainException(DomainException.Key.CouldNotDeleteTag);
         }
-        Event deletedEvent = new TagDeletedEvent(command.command().id(), command.executedAt());
+        Event deletedEvent = new TagDeletedEvent(command.id(), command.getExecutedAt());
         recordEvents(List.of(deletedEvent));
     }
 
@@ -101,6 +101,17 @@ public class Tag extends Aggregate {
             }
             default -> throw new UnsupportedOperationException("Unknown event type: " + event.getClass());
         }
+    }
+
+    @Override
+    protected void handle(Command command) {
+        switch (command) {
+            case CreateTagCommand c -> create(c);
+            case ChangeTagCommand c -> change(c);
+            case DeleteTagCommand c -> delete(c);
+            default -> throw new UnsupportedOperationException("Unknown event type: " + command.getClass());
+        }
+
     }
 
     public TagId getId() {
