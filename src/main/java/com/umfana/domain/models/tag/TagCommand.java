@@ -5,7 +5,15 @@ import com.umfana.domain.Command;
 import java.time.Instant;
 
 public class TagCommand extends Command {
-    protected TagCommand(Instant executedAt) {
+
+    private final TagId id;
+
+    protected TagCommand(Instant executedAt, TagId id) {
         super(executedAt);
+        this.id = id;
+    }
+
+    public TagId id() {
+        return id;
     }
 }

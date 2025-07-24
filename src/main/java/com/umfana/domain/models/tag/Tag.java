@@ -87,7 +87,7 @@ public class Tag extends Aggregate<TagCommand, TagEvent> {
     protected void apply(TagEvent event) {
         switch (event) {
             case TagCreatedEvent e -> {
-                this.id = e.getTagId();
+                this.id = e.id();
                 this.state = TagState.CREATED;
                 this.color = e.getColor();
                 this.name = e.getName();

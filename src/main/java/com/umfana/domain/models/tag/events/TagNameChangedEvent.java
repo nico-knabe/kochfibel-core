@@ -7,18 +7,13 @@ import java.time.Instant;
 
 public class TagNameChangedEvent extends TagEvent {
 
-    private final TagId tagId;
     private final Instant changedAt;
     private final String name;
 
     public TagNameChangedEvent(TagId tagId, Instant changedAt, String name) {
-        this.tagId = tagId;
+        super(tagId);
         this.changedAt = changedAt;
         this.name = name;
-    }
-
-    public TagId getTagId() {
-        return tagId;
     }
 
     public Instant getChangedAt() {

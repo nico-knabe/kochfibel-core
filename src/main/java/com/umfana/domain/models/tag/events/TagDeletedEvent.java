@@ -7,16 +7,11 @@ import java.time.Instant;
 
 public class TagDeletedEvent extends TagEvent {
 
-    private final TagId tagId;
     private final Instant deletedAt;
 
     public TagDeletedEvent(TagId tagId, Instant deletedAt) {
-        this.tagId = tagId;
+        super(tagId);
         this.deletedAt = deletedAt;
-    }
-
-    public TagId getTagId() {
-        return tagId;
     }
 
     public Instant getDeletedAt() {

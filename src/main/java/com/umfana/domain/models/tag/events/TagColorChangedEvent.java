@@ -8,18 +8,13 @@ import java.time.Instant;
 
 public class TagColorChangedEvent extends TagEvent {
 
-    private final TagId tagId;
     private final Instant changedAt;
     private final TagColor color;
 
     public TagColorChangedEvent(TagId tagId, Instant changedAt, TagColor color) {
-        this.tagId = tagId;
+        super(tagId);
         this.changedAt = changedAt;
         this.color = color;
-    }
-
-    public TagId getTagId() {
-        return tagId;
     }
 
     public Instant getChangedAt() {

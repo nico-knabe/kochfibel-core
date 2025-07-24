@@ -7,7 +7,7 @@ import com.umfana.domain.models.tag.valueobjects.TagColor;
 import java.time.Instant;
 
 public final class ChangeTagCommand extends TagCommand {
-    private final TagId id;
+
     private final String name;
     private final TagColor color;
 
@@ -17,14 +17,9 @@ public final class ChangeTagCommand extends TagCommand {
             String name,
             TagColor color
     ) {
-        super(executedAt);
-        this.id = id;
+        super(executedAt, id);
         this.name = name;
         this.color = color;
-    }
-
-    public TagId id() {
-        return id;
     }
 
     public String name() {
