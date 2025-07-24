@@ -1,7 +1,10 @@
 package com.umfana.domain;
 
+import lombok.Getter;
+
 import java.time.Instant;
 
+@Getter
 public abstract class Command {
 
     private final Instant executedAt;
@@ -10,7 +13,4 @@ public abstract class Command {
         this.executedAt = executedAt;
     }
 
-    public Instant getExecutedAt() {
-        return executedAt;
-    }
 }

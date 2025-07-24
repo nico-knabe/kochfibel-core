@@ -10,9 +10,13 @@ import com.umfana.domain.models.tag.events.TagCreatedEvent;
 import com.umfana.domain.models.tag.events.TagDeletedEvent;
 import com.umfana.domain.models.tag.events.TagNameChangedEvent;
 import com.umfana.domain.models.tag.valueobjects.TagColor;
+import lombok.Getter;
+import lombok.ToString;
 
 import java.util.List;
 
+@ToString(callSuper = true)
+@Getter
 public class Tag extends Aggregate<TagCommand, TagEvent> {
 
     private enum TagState {
@@ -29,65 +33,11 @@ public class Tag extends Aggregate<TagCommand, TagEvent> {
     }
 
 
-    public void create(CreateTagCommand command) {
-        if (state.equals(TagState.CREATED) || state.equals(TagState.DELETED)) {
-            throw new DomainException(DomainException.Key.CouldNotCreateTag);
-        }
-        if (command.name() == null || command.name().isEmpty()) {
-            throw new DomainException(DomainException.Key.TagNameDoesNotBeBlank);
-        }
-        if (command.color() == null) {
-            throw new DomainException(DomainException.Key.TagColorDoesNotBeNull);
-        }
-
-        var createdEvent = new TagCreatedEvent(
-                command.id(),
-                command.getExecutedAt(),
-                command.name(),
-                command.color()
-        );
-        recordEvents(List.of(createdEvent));
-    }
-
-    public void change(ChangeTagCommand command) {
-        if (command.id() == null || !command.id().getValue().equals(this.id.getValue())) {
-            throw new DomainException(DomainException.Key.WrongTagId);
-        }
-        if (state.equals(TagState.DELETED)) {
-            throw new DomainException(DomainException.Key.TagIsDeleted);
-        }
-        if (command.name() == null || command.name().isEmpty()) {
-            throw new DomainException(DomainException.Key.TagNameDoesNotBeBlank);
-        }
-        var colorChangedEvent = new TagColorChangedEvent(
-                this.id,
-                command.getExecutedAt(),
-                command.color()
-        );
-        var nameChangedEvent = new TagNameChangedEvent(
-                this.id,
-                command.getExecutedAt(),
-                command.name()
-        );
-        recordEvents(List.of(colorChangedEvent, nameChangedEvent));
-    }
-
-    public void delete(DeleteTagCommand command) {
-        if (command.id() == null || !command.id().getValue().equals(this.id.getValue())) {
-            throw new DomainException(DomainException.Key.WrongTagId);
-        }
-        if (state.equals(TagState.DELETED)) {
-            throw new DomainException(DomainException.Key.CouldNotDeleteTag);
-        }
-        var deletedEvent = new TagDeletedEvent(command.id(), command.getExecutedAt());
-        recordEvents(List.of(deletedEvent));
-    }
-
     @Override
     protected void apply(TagEvent event) {
         switch (event) {
             case TagCreatedEvent e -> {
-                this.id = e.id();
+                this.id = e.getTagId();
                 this.state = TagState.CREATED;
                 this.color = e.getColor();
                 this.name = e.getName();
@@ -102,7 +52,7 @@ public class Tag extends Aggregate<TagCommand, TagEvent> {
     }
 
     @Override
-    protected void handle(TagCommand command) {
+    public void handle(TagCommand command) {
         switch (command) {
             case CreateTagCommand c -> create(c);
             case ChangeTagCommand c -> change(c);
@@ -112,29 +62,62 @@ public class Tag extends Aggregate<TagCommand, TagEvent> {
 
     }
 
-    public TagId getId() {
-        ensureNotDeleted();
-        return id;
+    private void create(CreateTagCommand command) {
+        if (state.equals(TagState.CREATED) || state.equals(TagState.DELETED)) {
+            throw new DomainException(DomainException.Key.CouldNotCreateTag);
+        }
+        if (command.getName() == null || command.getName().isEmpty()) {
+            throw new DomainException(DomainException.Key.TagNameDoesNotBeBlank);
+        }
+        if (command.getColor() == null) {
+            throw new DomainException(DomainException.Key.TagColorDoesNotBeNull);
+        }
+
+        var createdEvent = new TagCreatedEvent(
+                command.getId(),
+                command.getExecutedAt(),
+                command.getName(),
+                command.getColor()
+        );
+        recordEvents(List.of(createdEvent));
     }
 
-    public String getName() {
-        ensureNotDeleted();
-        return name;
+    private void change(ChangeTagCommand command) {
+        if (command.getId() == null || !command.getId().getValue().equals(this.getId().getValue())) {
+            throw new DomainException(DomainException.Key.WrongTagId);
+        }
+        if (state.equals(TagState.DELETED)) {
+            throw new DomainException(DomainException.Key.TagIsDeleted);
+        }
+        if (command.getName() == null || command.getName().isEmpty()) {
+            throw new DomainException(DomainException.Key.TagNameDoesNotBeBlank);
+        }
+        var colorChangedEvent = new TagColorChangedEvent(
+                this.id,
+                command.getExecutedAt(),
+                command.getColor()
+        );
+        var nameChangedEvent = new TagNameChangedEvent(
+                this.id,
+                command.getExecutedAt(),
+                command.getName()
+        );
+        recordEvents(List.of(colorChangedEvent, nameChangedEvent));
     }
 
-    public TagColor getColor() {
-        ensureNotDeleted();
-        return color;
+    private void delete(DeleteTagCommand command) {
+        if (command.getId() == null || !command.getId().getValue().equals(this.id.getValue())) {
+            throw new DomainException(DomainException.Key.WrongTagId);
+        }
+        if (state.equals(TagState.DELETED)) {
+            throw new DomainException(DomainException.Key.CouldNotDeleteTag);
+        }
+        var deletedEvent = new TagDeletedEvent(command.getId(), command.getExecutedAt());
+        recordEvents(List.of(deletedEvent));
     }
 
     public boolean isDeleted() {
         return state.equals(TagState.DELETED);
-    }
-
-    private void ensureNotDeleted() {
-        if (isDeleted()) {
-            throw new DomainException(DomainException.Key.TagIsDeleted);
-        }
     }
 
 }

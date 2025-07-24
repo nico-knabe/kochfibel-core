@@ -1,16 +1,14 @@
 package com.umfana.domain.models.tag;
 
 import com.umfana.domain.Event;
+import lombok.Getter;
 
-public class TagEvent extends Event {
+@Getter
+public abstract class TagEvent extends Event {
 
-    private final TagId id;
+    private final TagId tagId;
 
-    public TagEvent(TagId id) {
-        this.id = id;
-    }
-
-    public TagId id() {
-        return id;
+    public TagEvent(TagId tagId) {
+        this.tagId = tagId;
     }
 }

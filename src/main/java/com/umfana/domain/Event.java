@@ -1,8 +1,11 @@
 package com.umfana.domain;
 
+import lombok.Getter;
+
 import java.time.Instant;
 import java.util.UUID;
 
+@Getter
 public abstract class Event {
 
     private final UUID id;
@@ -13,11 +16,4 @@ public abstract class Event {
         this.occurredAt = Instant.now();
     }
 
-    public UUID getId() {
-        return id;
-    }
-
-    public Instant getOccurredAt() {
-        return occurredAt;
-    }
 }

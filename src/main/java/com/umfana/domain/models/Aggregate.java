@@ -38,5 +38,5 @@ public abstract class Aggregate<C extends Command, E extends Event> {
 
     protected abstract void apply(E event);
 
-    protected abstract void handle(C command);
+    public abstract void handle(C command);
 }

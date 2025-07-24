@@ -3,9 +3,15 @@ package com.umfana.domain.models.tag.events;
 import com.umfana.domain.models.tag.TagEvent;
 import com.umfana.domain.models.tag.TagId;
 import com.umfana.domain.models.tag.valueobjects.TagColor;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.ToString;
 
 import java.time.Instant;
 
+@Getter
+@EqualsAndHashCode(callSuper = true)
+@ToString(callSuper = true)
 public class TagColorChangedEvent extends TagEvent {
 
     private final Instant changedAt;
@@ -17,11 +23,4 @@ public class TagColorChangedEvent extends TagEvent {
         this.color = color;
     }
 
-    public Instant getChangedAt() {
-        return changedAt;
-    }
-
-    public TagColor getColor() {
-        return color;
-    }
 }

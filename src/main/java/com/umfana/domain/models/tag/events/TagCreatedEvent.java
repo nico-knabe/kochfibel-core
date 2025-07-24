@@ -3,9 +3,15 @@ package com.umfana.domain.models.tag.events;
 import com.umfana.domain.models.tag.TagEvent;
 import com.umfana.domain.models.tag.TagId;
 import com.umfana.domain.models.tag.valueobjects.TagColor;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.ToString;
 
 import java.time.Instant;
 
+@Getter
+@EqualsAndHashCode(callSuper = true)
+@ToString(callSuper = true)
 public class TagCreatedEvent extends TagEvent {
 
     private final Instant createdAt;
@@ -19,15 +25,4 @@ public class TagCreatedEvent extends TagEvent {
         this.color = color;
     }
 
-    public Instant getCreatedAt() {
-        return createdAt;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public TagColor getColor() {
-        return color;
-    }
 }

@@ -20,10 +20,10 @@ public class ChangeTagApplicationService extends ApplicationService<ChangeTagCom
 
     @Override
     public void execute(ChangeTagCommand command) {
-        if (!isTagNameUniqueDomainService.isTagNameUnique(command.name())) {
-            List<TagEvent> events = eventStore.loadEvents(command.id());
+        if (!isTagNameUniqueDomainService.isTagNameUnique(command.getName())) {
+            List<TagEvent> events = eventStore.loadEvents(command.getId());
             Tag tag = new Tag(events);
-            tag.change(command);
+            tag.handle(command);
             eventStore.saveEvents(tag.getId(), tag.getUncommittedEvents());
         } else {
             throw new DomainException(DomainException.Key.TagNameAlreadyExists);

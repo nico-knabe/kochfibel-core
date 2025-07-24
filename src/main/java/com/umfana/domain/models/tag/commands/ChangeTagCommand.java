@@ -3,9 +3,15 @@ package com.umfana.domain.models.tag.commands;
 import com.umfana.domain.models.tag.TagCommand;
 import com.umfana.domain.models.tag.TagId;
 import com.umfana.domain.models.tag.valueobjects.TagColor;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.ToString;
 
 import java.time.Instant;
 
+@Getter
+@EqualsAndHashCode(callSuper = true)
+@ToString(callSuper = true)
 public final class ChangeTagCommand extends TagCommand {
 
     private final String name;
@@ -20,13 +26,5 @@ public final class ChangeTagCommand extends TagCommand {
         super(executedAt, id);
         this.name = name;
         this.color = color;
-    }
-
-    public String name() {
-        return name;
-    }
-
-    public TagColor color() {
-        return color;
     }
 }

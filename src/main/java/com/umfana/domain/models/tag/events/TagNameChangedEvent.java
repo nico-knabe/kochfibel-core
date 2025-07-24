@@ -2,9 +2,15 @@ package com.umfana.domain.models.tag.events;
 
 import com.umfana.domain.models.tag.TagEvent;
 import com.umfana.domain.models.tag.TagId;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.ToString;
 
 import java.time.Instant;
 
+@Getter
+@EqualsAndHashCode(callSuper = true)
+@ToString(callSuper = true)
 public class TagNameChangedEvent extends TagEvent {
 
     private final Instant changedAt;
@@ -16,11 +22,4 @@ public class TagNameChangedEvent extends TagEvent {
         this.name = name;
     }
 
-    public Instant getChangedAt() {
-        return changedAt;
-    }
-
-    public String getName() {
-        return name;
-    }
 }

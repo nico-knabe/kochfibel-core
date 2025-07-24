@@ -49,8 +49,10 @@ class TagTest {
     @Test
     void couldNotCreateCreatedTagTest() {
         Tag tag = createTag("name");
+        System.out.println(tag);
         CreateTagCommand createTagCommand = new CreateTagCommand(NOW, TAG_ID, "name", TagColor.BLUE);
-        DomainException exception = Assertions.assertThrows(DomainException.class, () -> tag.create(createTagCommand));
+        System.out.println(createTagCommand);
+        DomainException exception = Assertions.assertThrows(DomainException.class, () -> tag.handle(createTagCommand));
         Assertions.assertEquals(DomainException.Key.CouldNotCreateTag, exception.getDescription());
     }
 
@@ -59,7 +61,7 @@ class TagTest {
         Tag tag = createTag("name");
         deleteTag(tag);
         CreateTagCommand createTagCommand = new CreateTagCommand(NOW, TAG_ID, "name", TagColor.BLUE);
-        DomainException exception = Assertions.assertThrows(DomainException.class, () -> tag.create(createTagCommand));
+        DomainException exception = Assertions.assertThrows(DomainException.class, () -> tag.handle(createTagCommand));
         Assertions.assertEquals(DomainException.Key.CouldNotCreateTag, exception.getDescription());
     }
 
@@ -79,7 +81,7 @@ class TagTest {
     void couldNotDeleteTagWithNullIdTest() {
         Tag tag = createTag("name");
         DeleteTagCommand deleteTagCommand = new DeleteTagCommand(NOW.plusSeconds(1), null);
-        DomainException exception = Assertions.assertThrows(DomainException.class, () -> tag.delete(deleteTagCommand));
+        DomainException exception = Assertions.assertThrows(DomainException.class, () -> tag.handle(deleteTagCommand));
         Assertions.assertEquals(DomainException.Key.WrongTagId, exception.getDescription());
     }
 
@@ -87,7 +89,7 @@ class TagTest {
     void couldNotDeleteTagWithDifferentIdTest() {
         Tag tag = createTag("name");
         DeleteTagCommand deleteTagCommand = new DeleteTagCommand(NOW.plusSeconds(1), new TagId(UUID.randomUUID()));
-        DomainException exception = Assertions.assertThrows(DomainException.class, () -> tag.delete(deleteTagCommand));
+        DomainException exception = Assertions.assertThrows(DomainException.class, () -> tag.handle(deleteTagCommand));
         Assertions.assertEquals(DomainException.Key.WrongTagId, exception.getDescription());
     }
 
@@ -97,7 +99,7 @@ class TagTest {
         TagId tagId = tag.getId();
         deleteTag(tag);
         ChangeTagCommand changeTagCommand = new ChangeTagCommand(NOW.plusSeconds(1), tagId, "newName", TagColor.RED);
-        DomainException exception = Assertions.assertThrows(DomainException.class, () -> tag.change(changeTagCommand));
+        DomainException exception = Assertions.assertThrows(DomainException.class, () -> tag.handle(changeTagCommand));
         Assertions.assertEquals(DomainException.Key.TagIsDeleted, exception.getDescription());
     }
 
@@ -121,18 +123,18 @@ class TagTest {
     private Tag createTag(String name) {
         CreateTagCommand createTagCommand = new CreateTagCommand(NOW, TAG_ID, name, TagColor.BLUE);
         Tag tag = new Tag(List.of());
-        tag.create(createTagCommand);
+        tag.handle(createTagCommand);
         return tag;
     }
 
     private void changeTag(Tag tag) {
         ChangeTagCommand changeTagCommand = new ChangeTagCommand(NOW.plusSeconds(1), TAG_ID, "newName", TagColor.RED);
-        tag.change(changeTagCommand);
+        tag.handle(changeTagCommand);
     }
 
     private void deleteTag(Tag tag) {
         DeleteTagCommand deleteTagCommand = new DeleteTagCommand(NOW.plusSeconds(1), TAG_ID);
-        tag.delete(deleteTagCommand);
+        tag.handle(deleteTagCommand);
     }
 
 }
