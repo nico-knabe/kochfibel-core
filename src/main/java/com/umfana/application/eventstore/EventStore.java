@@ -5,9 +5,9 @@ import com.umfana.domain.Id;
 
 import java.util.List;
 
-public interface EventStore {
+public interface EventStore<I extends Id, E extends Event> {
 
-    void saveEvents(Id aggregateId, List<Event> events);
+    void saveEvents(I aggregateId, List<E> events);
 
-    List<Event> loadEvents(Id aggregateId);
+    List<E> loadEvents(I aggregateId);
 }

@@ -1,26 +1,27 @@
 package com.umfana.application.services;
 
-import com.umfana.application.eventstore.EventStore;
 import com.umfana.domain.DomainException;
-import com.umfana.domain.Event;
 import com.umfana.domain.models.tag.Tag;
+import com.umfana.domain.models.tag.TagEvent;
+import com.umfana.domain.models.tag.TagEventStore;
 import com.umfana.domain.models.tag.commands.ChangeTagCommand;
 import com.umfana.domain.services.IsTagNameUniqueDomainService;
 
 import java.util.List;
 
 public class ChangeTagApplicationService extends ApplicationService<ChangeTagCommand> {
+    private final TagEventStore eventStore;
     private final IsTagNameUniqueDomainService isTagNameUniqueDomainService;
 
-    protected ChangeTagApplicationService(EventStore eventStore, IsTagNameUniqueDomainService isTagNameUniqueDomainService) {
-        super(eventStore);
+    protected ChangeTagApplicationService(TagEventStore eventStore, IsTagNameUniqueDomainService isTagNameUniqueDomainService) {
+        this.eventStore = eventStore;
         this.isTagNameUniqueDomainService = isTagNameUniqueDomainService;
     }
 
     @Override
     public void execute(ChangeTagCommand command) {
         if (!isTagNameUniqueDomainService.isTagNameUnique(command.name())) {
-            List<Event> events = eventStore.loadEvents(command.id());
+            List<TagEvent> events = eventStore.loadEvents(command.id());
             Tag tag = new Tag(events);
             tag.change(command);
             eventStore.saveEvents(tag.getId(), tag.getUncommittedEvents());

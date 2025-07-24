@@ -7,23 +7,23 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public abstract class Aggregate {
+public abstract class Aggregate<C extends Command, E extends Event> {
 
-    protected Aggregate(List<Event> events) {
+    protected Aggregate(List<E> events) {
         events.forEach(this::apply);
     }
 
-    private final List<Event> uncommittedEvents = new ArrayList<>();
+    private final List<E> uncommittedEvents = new ArrayList<>();
 
     public void markEventsAsCommitted() {
         uncommittedEvents.clear();
     }
 
-    public void addEvent(Event event) {
+    public void addEvent(E event) {
         uncommittedEvents.add(event);
     }
 
-    public List<Event> getUncommittedEvents() {
+    public List<E> getUncommittedEvents() {
         return Collections.unmodifiableList(uncommittedEvents);
     }
 
@@ -31,12 +31,12 @@ public abstract class Aggregate {
         uncommittedEvents.clear();
     }
 
-    protected void recordEvents(List<Event> events) {
+    protected void recordEvents(List<E> events) {
         events.forEach(this::addEvent);
         events.forEach(this::apply);
     }
 
-    protected abstract void apply(Event event);
+    protected abstract void apply(E event);
 
-    protected abstract void handle(Command command);
+    protected abstract void handle(C command);
 }

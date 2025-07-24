@@ -1,8 +1,8 @@
 package com.umfana.application.services;
 
-import com.umfana.application.eventstore.EventStore;
 import com.umfana.domain.DomainException;
 import com.umfana.domain.models.tag.Tag;
+import com.umfana.domain.models.tag.TagEventStore;
 import com.umfana.domain.models.tag.commands.CreateTagCommand;
 import com.umfana.domain.services.IsTagNameUniqueDomainService;
 
@@ -10,10 +10,11 @@ import java.util.List;
 
 public class CreateTagApplicationService extends ApplicationService<CreateTagCommand> {
 
+    private final TagEventStore eventStore;
     private final IsTagNameUniqueDomainService isTagNameUniqueDomainService;
 
-    protected CreateTagApplicationService(EventStore eventStore, IsTagNameUniqueDomainService isTagNameUniqueDomainService) {
-        super(eventStore);
+    protected CreateTagApplicationService(TagEventStore eventStore, IsTagNameUniqueDomainService isTagNameUniqueDomainService) {
+        this.eventStore = eventStore;
         this.isTagNameUniqueDomainService = isTagNameUniqueDomainService;
     }
 

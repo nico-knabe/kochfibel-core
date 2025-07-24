@@ -1,11 +1,11 @@
 package com.umfana.domain.models.tag.events;
 
-import com.umfana.domain.Event;
+import com.umfana.domain.models.tag.TagEvent;
 import com.umfana.domain.models.tag.TagId;
 
 import java.time.Instant;
 
-public class TagNameChangedEvent extends Event {
+public class TagNameChangedEvent extends TagEvent {
 
     private final TagId tagId;
     private final Instant changedAt;

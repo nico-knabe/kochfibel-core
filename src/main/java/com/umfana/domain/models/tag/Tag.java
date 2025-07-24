@@ -1,8 +1,6 @@
 package com.umfana.domain.models.tag;
 
-import com.umfana.domain.Command;
 import com.umfana.domain.DomainException;
-import com.umfana.domain.Event;
 import com.umfana.domain.models.Aggregate;
 import com.umfana.domain.models.tag.commands.ChangeTagCommand;
 import com.umfana.domain.models.tag.commands.CreateTagCommand;
@@ -15,7 +13,7 @@ import com.umfana.domain.models.tag.valueobjects.TagColor;
 
 import java.util.List;
 
-public class Tag extends Aggregate {
+public class Tag extends Aggregate<TagCommand, TagEvent> {
 
     private enum TagState {
         INIT, CREATED, DELETED
@@ -26,7 +24,7 @@ public class Tag extends Aggregate {
     private String name;
     private TagColor color;
 
-    public Tag(List<Event> events) {
+    public Tag(List<TagEvent> events) {
         super(events);
     }
 
@@ -42,7 +40,7 @@ public class Tag extends Aggregate {
             throw new DomainException(DomainException.Key.TagColorDoesNotBeNull);
         }
 
-        Event createdEvent = new TagCreatedEvent(
+        var createdEvent = new TagCreatedEvent(
                 command.id(),
                 command.getExecutedAt(),
                 command.name(),
@@ -81,12 +79,12 @@ public class Tag extends Aggregate {
         if (state.equals(TagState.DELETED)) {
             throw new DomainException(DomainException.Key.CouldNotDeleteTag);
         }
-        Event deletedEvent = new TagDeletedEvent(command.id(), command.getExecutedAt());
+        var deletedEvent = new TagDeletedEvent(command.id(), command.getExecutedAt());
         recordEvents(List.of(deletedEvent));
     }
 
     @Override
-    protected void apply(Event event) {
+    protected void apply(TagEvent event) {
         switch (event) {
             case TagCreatedEvent e -> {
                 this.id = e.getTagId();
@@ -104,7 +102,7 @@ public class Tag extends Aggregate {
     }
 
     @Override
-    protected void handle(Command command) {
+    protected void handle(TagCommand command) {
         switch (command) {
             case CreateTagCommand c -> create(c);
             case ChangeTagCommand c -> change(c);
